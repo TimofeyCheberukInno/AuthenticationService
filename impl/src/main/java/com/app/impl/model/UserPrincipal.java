@@ -2,6 +2,7 @@ package com.app.impl.model;
 
 import java.util.List;
 import java.util.Collection;
+import java.util.Objects;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -59,5 +60,28 @@ public class UserPrincipal implements UserDetails {
     @Override
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o)
+            return true;
+        if(o == null || this.getClass() != o.getClass())
+            return false;
+        UserPrincipal principal = (UserPrincipal)o;
+        return this.login.equals(principal.login);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.login);
+    }
+
+    @Override
+    public String toString() {
+        return "UserPrincipal{" +
+                "login='" + login + '\'' +
+                ", authorities=" + authorities +
+                '}';
     }
 }

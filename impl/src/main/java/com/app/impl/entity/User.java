@@ -1,6 +1,7 @@
 package com.app.impl.entity;
 
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -9,10 +10,21 @@ import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.Builder;
+
 import com.app.impl.enums.UserRole;
 
 @Entity
 @Table(name = "users_auth")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@Builder
 public class User extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +38,29 @@ public class User extends AuditableEntity {
 
     @Column(name = "user_roles", nullable = false)
     private List<UserRole> roles;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || this.getClass() != o.getClass())
+            return false;
+        User user = (User) o;
+
+        return Objects.equals(this.login, user.login);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.login);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", login='" + login + '\'' +
+                ", roles=" + roles +
+                '}';
+    }
 }
