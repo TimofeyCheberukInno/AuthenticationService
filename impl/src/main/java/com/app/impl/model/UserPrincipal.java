@@ -1,0 +1,63 @@
+package com.app.impl.model;
+
+import java.util.List;
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.app.impl.enums.UserRole;
+
+public class UserPrincipal implements UserDetails {
+    private final String login;
+    private final String password;
+    private final Collection<? extends GrantedAuthority> authorities;
+
+    public UserPrincipal(
+            String login,
+            String password,
+            List<UserRole> authorities
+    ) {
+        this.login = login;
+        this.password = password;
+        this.authorities = authorities.stream()
+                .map(authority -> new SimpleGrantedAuthority(authority.getName()))
+                .toList();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.authorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.login;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
+    }
+}
