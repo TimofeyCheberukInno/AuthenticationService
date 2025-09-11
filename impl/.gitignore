@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Sensetive info ###
+**/.env
+
 ### STS ###
 .apt_generated
 .classpath
