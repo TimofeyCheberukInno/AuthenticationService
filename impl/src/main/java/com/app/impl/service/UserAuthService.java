@@ -3,7 +3,6 @@ package com.app.impl.service;
 import com.app.impl.model.UserPrincipal;
 import com.app.impl.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,7 @@ public class UserAuthService implements UserDetailsService {
 
     @Transactional(readOnly = true)
     @Override
-    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+    public UserPrincipal loadUserByUsername(String login) throws UsernameNotFoundException {
         return userRepository.findByLogin(login)
                 .map(user -> new UserPrincipal(
                         user.getLogin(),
