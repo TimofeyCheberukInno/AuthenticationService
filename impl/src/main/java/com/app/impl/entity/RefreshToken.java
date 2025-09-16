@@ -16,6 +16,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Builder;
 
+// TODO: каскадирование
+
 @Entity
 @Table(name = "refresh_tokens")
 @NoArgsConstructor
@@ -28,7 +30,7 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "token_hash", unique = true)
+    @Column(name = "token_hash", unique = true, nullable = false)
     private String tokenHash;
 
     @OneToOne(fetch = FetchType.LAZY)

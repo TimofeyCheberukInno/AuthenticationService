@@ -1,0 +1,65 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="create_user_role_enum" author="Tsimafei Chabiaruk">
+        <sql>
+            CREATE TYPE user_role AS ENUM ('ADMIN', 'USER', 'GUEST');
+        </sql>
+        <rollback>
+            DROP TYPE user_role;
+        </rollback>
+    </changeSet>
+
+        <changeSet id="create_users_auth_table" author="Tsimafei Chabiaruk">
+            <createTable tableName="users_auth">
+                <column name="id" type="bigserial" autoIncrement="true">
+                    <constraints primaryKey="true" nullable="false"/>
+                </column>
+                <column name="login" type="varchar(50)">
+                    <constraints unique="true" nullable="false"/>
+                </column>
+                <column name="password_hash" type="text">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="roles" type="user_role[]">
+                    <constraints nullable="false"/>
+                </column>
+            </createTable>
+
+            <rollback>
+                <dropTable tableName="users_auth"/>
+            </rollback>
+        </changeSet>
+
+        <changeSet id="create_refresh_tokens_table_and_add_users_auth_foreign_key" author="">
+            <createTable tableName="refresh_tokens">
+                <column name="id" type="bigserial" autoIncrement="true">
+                    <constraints primaryKey="true" nullable="true"/>
+                </column>
+                <column name="token_hash" type="text">
+                    <constraints unique="true" nullable="false"/>
+                </column>
+                <column name="user_id" type="bigint">
+                    <constraints nullable="false"/>
+                </column>
+            </createTable>
+
+            <addForeignKeyConstraint
+                    baseTableName="refresh_tokens"
+                    baseColumnNames="user_id"
+                    constraintName="fk_refresh_token_user"
+                    referencedTableName="users_auth"
+                    referencedColumnNames="id"
+            />
+
+            <rollback>
+                <dropForeignKeyConstraint
+                        baseTableName="refresh_tokens"
+                        constraintName="fk_refresh_token_user"/>
+                <dropTable tableName="refresh_tokens"
+            </rollback>
+        </changeSet>
+</databaseChangeLog>
