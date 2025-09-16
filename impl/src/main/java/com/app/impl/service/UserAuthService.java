@@ -3,6 +3,8 @@ package com.app.impl.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.jsonwebtoken.JwtException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -66,6 +68,10 @@ public class UserAuthService implements UserDetailsService {
         userAuthRepository.save(user);
     }
 
+    // Пользователь успешно проходит аутентификацию (вводит логин/пароль).
+    // Ваш сервис генерирует новый AccessToken и RefreshToken.
+    // Прежде чем сохранить новый RefreshToken, сервис использует findByUser() для поиска
+    // и удаления старого токена, связанного с этим пользователем.
     @Transactional(readOnly = true)
     public AuthResponse login(AuthRequest request) {
         User user = userAuthRepository.findByLogin(request.login())
@@ -79,5 +85,25 @@ public class UserAuthService implements UserDetailsService {
         String accessToken = jwtUtil.generateAccessToken(userPrincipal);
         String refreshToken = jwtUtil.generateRefreshToken(userPrincipal);
         return new AuthResponse(accessToken, refreshToken);
+    }
+
+    @Transactional(readOnly = true)
+    public AuthResponse refreshToken(String tokenHeader) {
+        final String token = extractTokenFromHeader(tokenHeader);
+        if(!jwtUtil.isRefreshToken(token)) throw new JwtException("Given token is not refresh token! Could not process refresh!");
+        final String login = jwtUtil.extractUsername(token);
+        UserPrincipal userPrincipal = loadUserByUsername(login);
+        String accessToken = jwtUtil.generateAccessToken(userPrincipal);
+        String refreshToken = jwtUtil.generateRefreshToken(userPrincipal);
+        return new AuthResponse(accessToken, refreshToken);
+    }
+
+    public String extractTokenFromHeader(String header) {
+        if(header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+        else{
+            throw new JwtException("Invalid token header");
+        }
     }
 }
