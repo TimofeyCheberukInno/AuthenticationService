@@ -3,6 +3,7 @@ package com.app.impl.util;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.function.Function;
 
 import io.jsonwebtoken.Jwts;
@@ -14,15 +15,20 @@ import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.app.impl.entity.RefreshToken;
+import com.app.impl.repository.RefreshTokenRepository;
 import com.app.impl.exception.TokenExpiredException;
 import com.app.impl.exception.AuthenticationException;
 import com.app.impl.model.UserPrincipal;
 
 @Component
 public class JwtUtil {
+    private final RefreshTokenRepository refreshTokenRepository;
+
     @Value("${jwt.access-token.expiration}")
     private long accessTokenExpiration;
 
@@ -31,7 +37,11 @@ public class JwtUtil {
 
     private final String secretKey;
 
-    public JwtUtil(@Value("${jwt.secret-key}") String secretKey) {
+    @Autowired
+    public JwtUtil(RefreshTokenRepository refreshTokenRepository,
+                   @Value("${jwt.secret-key}") String secretKey
+    ) {
+        this.refreshTokenRepository = refreshTokenRepository;
         this.secretKey = secretKey;
     }
 
@@ -53,6 +63,11 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public boolean isRefreshToken(String tokenHash) {
+        Optional<RefreshToken> refreshToken = refreshTokenRepository.findByTokenHash(tokenHash);
+        return refreshToken.isPresent();
     }
 
     public String extractUsername(String token) {
