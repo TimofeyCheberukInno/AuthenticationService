@@ -132,7 +132,6 @@ public class UserAuthService implements UserDetailsService {
     public TokenValidationResponse validate(TokenValidationRequest request) {
         final String token = extractTokenFromHeader(request.tokenHeader());
         final String login = jwtUtil.extractUsername(token);
-        UserPrincipal userPrincipal = loadUserByUsername(login);
         return new TokenValidationResponse(
                 jwtUtil.isRefreshTokenValid(token),
                 login
