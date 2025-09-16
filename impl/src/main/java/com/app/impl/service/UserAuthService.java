@@ -2,7 +2,11 @@ package com.app.impl.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import com.app.impl.dto.tokenRefresh.TokenRefreshRequest;
+import com.app.impl.dto.tokenValidation.TokenValidationRequest;
+import com.app.impl.dto.tokenValidation.TokenValidationResponse;
 import io.jsonwebtoken.JwtException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.app.impl.entity.RefreshToken;
+import com.app.impl.exception.TokenExpiredException;
+import com.app.impl.repository.RefreshTokenRepository;
 import com.app.impl.enums.UserRole;
 import com.app.impl.dto.auth.AuthResponse;
 import com.app.impl.dto.auth.AuthRequest;
@@ -25,16 +32,19 @@ import com.app.impl.exception.UserPrincipalNotFoundException;
 @Service
 public class UserAuthService implements UserDetailsService {
     private final UserAuthRepository userAuthRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserAuthService(
             UserAuthRepository userAuthRepository,
+            RefreshTokenRepository refreshTokenRepository,
             JwtUtil jwtUtil,
             PasswordEncoder passwordEncoder
     ) {
         this.userAuthRepository = userAuthRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
     }
@@ -68,11 +78,7 @@ public class UserAuthService implements UserDetailsService {
         userAuthRepository.save(user);
     }
 
-    // Пользователь успешно проходит аутентификацию (вводит логин/пароль).
-    // Ваш сервис генерирует новый AccessToken и RefreshToken.
-    // Прежде чем сохранить новый RefreshToken, сервис использует findByUser() для поиска
-    // и удаления старого токена, связанного с этим пользователем.
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(AuthRequest request) {
         User user = userAuthRepository.findByLogin(request.login())
                 .orElseThrow(() -> new UserPrincipalNotFoundException("User with login " + request.login() + " was not found"));
@@ -84,18 +90,53 @@ public class UserAuthService implements UserDetailsService {
         UserPrincipal userPrincipal = loadUserByUsername(request.login());
         String accessToken = jwtUtil.generateAccessToken(userPrincipal);
         String refreshToken = jwtUtil.generateRefreshToken(userPrincipal);
+        RefreshToken refreshTokenEntity = RefreshToken.builder()
+                .tokenHash(passwordEncoder.encode(refreshToken))
+                .user(user)
+                .build();
+        refreshTokenRepository.save(refreshTokenEntity);
+
+        return new AuthResponse(accessToken, refreshToken);
+    }
+
+    @Transactional
+    public AuthResponse refreshToken(TokenRefreshRequest request) {
+        final String token = extractTokenFromHeader(request.tokenHeader());
+        if(!jwtUtil.isRefreshToken(passwordEncoder.encode(token)))
+            throw new JwtException("Given token is not refresh token! Could not process refresh!");
+
+        if(!jwtUtil.isRefreshTokenValid(token))
+            throw new TokenExpiredException("Refresh token has expired!");
+
+
+        final String login = jwtUtil.extractUsername(token);
+        User user = userAuthRepository.findByLogin(login)
+                .orElseThrow(() -> new UserPrincipalNotFoundException("User with login " + login + " was not found"));
+
+        UserPrincipal userPrincipal = loadUserByUsername(login);
+        String accessToken = jwtUtil.generateAccessToken(userPrincipal);
+        String refreshToken = jwtUtil.generateRefreshToken(userPrincipal);
+
+        Optional<RefreshToken> oldRefreshToken = refreshTokenRepository.findByUser(user);
+        oldRefreshToken.ifPresent(refreshTokenRepository::delete);
+        RefreshToken refreshTokenEntity = RefreshToken.builder()
+                .tokenHash(passwordEncoder.encode(refreshToken))
+                .user(user)
+                .build();
+        refreshTokenRepository.save(refreshTokenEntity);
+
         return new AuthResponse(accessToken, refreshToken);
     }
 
     @Transactional(readOnly = true)
-    public AuthResponse refreshToken(String tokenHeader) {
-        final String token = extractTokenFromHeader(tokenHeader);
-        if(!jwtUtil.isRefreshToken(token)) throw new JwtException("Given token is not refresh token! Could not process refresh!");
+    public TokenValidationResponse validate(TokenValidationRequest request) {
+        final String token = extractTokenFromHeader(request.tokenHeader());
         final String login = jwtUtil.extractUsername(token);
         UserPrincipal userPrincipal = loadUserByUsername(login);
-        String accessToken = jwtUtil.generateAccessToken(userPrincipal);
-        String refreshToken = jwtUtil.generateRefreshToken(userPrincipal);
-        return new AuthResponse(accessToken, refreshToken);
+        return new TokenValidationResponse(
+                jwtUtil.isRefreshTokenValid(token),
+                login
+        );
     }
 
     public String extractTokenFromHeader(String header) {
