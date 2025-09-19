@@ -1,4 +1,4 @@
-package com.app.impl.dto.tokenValidation;
+package com.app.impl.model.dto.tokenValidation;
 
 import jakarta.validation.constraints.NotBlank;
 

@@ -1,6 +1,7 @@
 package com.app.impl.util;
 
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Optional;
@@ -29,6 +30,8 @@ import com.app.impl.model.UserPrincipal;
 public class JwtUtil {
     private final RefreshTokenRepository refreshTokenRepository;
 
+    private final TokenHashUtil tokenHashUtil;
+
     @Value("${jwt.access-token.expiration}")
     private long accessTokenExpiration;
 
@@ -39,9 +42,11 @@ public class JwtUtil {
 
     @Autowired
     public JwtUtil(RefreshTokenRepository refreshTokenRepository,
+                   TokenHashUtil tokenHashUtil,
                    @Value("${jwt.secret-key}") String secretKey
     ) {
         this.refreshTokenRepository = refreshTokenRepository;
+        this.tokenHashUtil = tokenHashUtil;
         this.secretKey = secretKey;
     }
 
@@ -65,7 +70,8 @@ public class JwtUtil {
                 .compact();
     }
 
-    public boolean isRefreshToken(String tokenHash) {
+    public boolean isRefreshToken(String token) throws NoSuchAlgorithmException {
+        final String tokenHash = tokenHashUtil.hashToken(token);
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findByTokenHash(tokenHash);
         return refreshToken.isPresent();
     }

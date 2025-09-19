@@ -3,12 +3,7 @@ package com.app.impl.entity;
 import java.util.List;
 import java.util.Objects;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -36,8 +31,9 @@ public class User extends AuditableEntity {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "user_roles", nullable = false)
-    private List<UserRole> roles;
+    private UserRole roles;
 
     @Override
     public boolean equals(Object o) {

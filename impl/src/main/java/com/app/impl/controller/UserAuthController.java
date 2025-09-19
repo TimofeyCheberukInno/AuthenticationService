@@ -12,13 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
-import com.app.impl.dto.auth.AuthResponse;
-import com.app.impl.dto.tokenRefresh.TokenRefreshRequest;
-import com.app.impl.dto.tokenValidation.TokenValidationRequest;
-import com.app.impl.dto.tokenValidation.TokenValidationResponse;
-import com.app.impl.dto.auth.AuthRequest;
+import com.app.impl.model.dto.auth.AuthResponse;
+import com.app.impl.model.dto.tokenRefresh.TokenRefreshRequest;
+import com.app.impl.model.dto.tokenValidation.TokenValidationRequest;
+import com.app.impl.model.dto.tokenValidation.TokenValidationResponse;
+import com.app.impl.model.dto.auth.AuthRequest;
 import com.app.impl.exception.AuthenticationException;
 import com.app.impl.service.UserAuthService;
+
+import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequestMapping("/auth")
@@ -38,20 +40,26 @@ public class UserAuthController {
     }
 
     @RequestMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequest request) throws AuthenticationException {
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequest request) throws AuthenticationException, NoSuchAlgorithmException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userAuthService.login(request));
     }
 
     @PutMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(@RequestBody @Valid TokenRefreshRequest request) throws AuthenticationException {
+    public ResponseEntity<AuthResponse> refresh(@RequestBody @Valid TokenRefreshRequest request) throws AuthenticationException, NoSuchAlgorithmException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userAuthService.refreshToken(request));
     }
 
-    @GetMapping("/validate")
-    public ResponseEntity<TokenValidationResponse> validate(@RequestBody @Valid TokenValidationRequest request) throws AuthenticationException {
+    @GetMapping("/validateAccessToken")
+    public ResponseEntity<TokenValidationResponse> validateAccessToken(@RequestBody @Valid TokenValidationRequest request) throws AuthenticationException {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(userAuthService.validate(request));
+                .body(userAuthService.validateAccessToken(request));
+    }
+
+    @GetMapping("/validateRefreshToken")
+    public ResponseEntity<TokenValidationResponse> validateRefreshToken(@RequestBody @Valid TokenValidationRequest request) throws AuthenticationException {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(userAuthService.validateRefreshToken(request));
     }
 }
