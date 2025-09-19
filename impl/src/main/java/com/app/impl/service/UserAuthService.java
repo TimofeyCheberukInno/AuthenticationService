@@ -1,7 +1,6 @@
 package com.app.impl.service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 import io.jsonwebtoken.JwtException;
@@ -13,15 +12,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.app.impl.dto.tokenRefresh.TokenRefreshRequest;
-import com.app.impl.dto.tokenValidation.TokenValidationRequest;
-import com.app.impl.dto.tokenValidation.TokenValidationResponse;
+import com.app.impl.model.dto.tokenRefresh.TokenRefreshRequest;
+import com.app.impl.util.TokenHashUtil;
+import com.app.impl.model.dto.tokenValidation.TokenValidationRequest;
+import com.app.impl.model.dto.tokenValidation.TokenValidationResponse;
 import com.app.impl.entity.RefreshToken;
 import com.app.impl.exception.TokenExpiredException;
 import com.app.impl.repository.RefreshTokenRepository;
 import com.app.impl.enums.UserRole;
-import com.app.impl.dto.auth.AuthResponse;
-import com.app.impl.dto.auth.AuthRequest;
+import com.app.impl.model.dto.auth.AuthResponse;
+import com.app.impl.model.dto.auth.AuthRequest;
 import com.app.impl.entity.User;
 import com.app.impl.exception.UserAlreadyExistsException;
 import com.app.impl.util.JwtUtil;
@@ -29,24 +29,29 @@ import com.app.impl.model.UserPrincipal;
 import com.app.impl.repository.UserAuthRepository;
 import com.app.impl.exception.UserPrincipalNotFoundException;
 
+// FIXME: issues with refresh and login methods
+//  access token expires rapidly
 @Service
 public class UserAuthService implements UserDetailsService {
     private final UserAuthRepository userAuthRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final TokenHashUtil tokenHashUtil;
 
     @Autowired
     public UserAuthService(
             UserAuthRepository userAuthRepository,
             RefreshTokenRepository refreshTokenRepository,
             JwtUtil jwtUtil,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            TokenHashUtil tokenHashUtil
     ) {
         this.userAuthRepository = userAuthRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
+        this.tokenHashUtil = tokenHashUtil;
     }
 
     @Transactional(readOnly = true)
@@ -72,14 +77,14 @@ public class UserAuthService implements UserDetailsService {
         User user = User.builder()
                 .login(login)
                 .passwordHash(passwordEncoder.encode(request.password()))
-                .roles(new ArrayList<>(List.of(UserRole.ROLE_USER)))
+                .roles(UserRole.ROLE_USER)
                 .build();
 
         userAuthRepository.save(user);
     }
 
     @Transactional
-    public AuthResponse login(AuthRequest request) {
+    public AuthResponse login(AuthRequest request) throws NoSuchAlgorithmException {
         User user = userAuthRepository.findByLogin(request.login())
                 .orElseThrow(() -> new UserPrincipalNotFoundException("User with login " + request.login() + " was not found"));
 
@@ -91,7 +96,7 @@ public class UserAuthService implements UserDetailsService {
         String accessToken = jwtUtil.generateAccessToken(userPrincipal);
         String refreshToken = jwtUtil.generateRefreshToken(userPrincipal);
         RefreshToken refreshTokenEntity = RefreshToken.builder()
-                .tokenHash(passwordEncoder.encode(refreshToken))
+                .tokenHash(tokenHashUtil.hashToken(refreshToken))
                 .user(user)
                 .build();
         refreshTokenRepository.save(refreshTokenEntity);
@@ -100,9 +105,9 @@ public class UserAuthService implements UserDetailsService {
     }
 
     @Transactional
-    public AuthResponse refreshToken(TokenRefreshRequest request) {
+    public AuthResponse refreshToken(TokenRefreshRequest request) throws NoSuchAlgorithmException {
         final String token = extractTokenFromHeader(request.tokenHeader());
-        if(!jwtUtil.isRefreshToken(passwordEncoder.encode(token)))
+        if(!jwtUtil.isRefreshToken(token))
             throw new JwtException("Given token is not refresh token! Could not process refresh!");
 
         if(!jwtUtil.isRefreshTokenValid(token))
@@ -120,7 +125,7 @@ public class UserAuthService implements UserDetailsService {
         Optional<RefreshToken> oldRefreshToken = refreshTokenRepository.findByUser(user);
         oldRefreshToken.ifPresent(refreshTokenRepository::delete);
         RefreshToken refreshTokenEntity = RefreshToken.builder()
-                .tokenHash(passwordEncoder.encode(refreshToken))
+                .tokenHash(tokenHashUtil.hashToken(refreshToken))
                 .user(user)
                 .build();
         refreshTokenRepository.save(refreshTokenEntity);
@@ -129,11 +134,22 @@ public class UserAuthService implements UserDetailsService {
     }
 
     @Transactional(readOnly = true)
-    public TokenValidationResponse validate(TokenValidationRequest request) {
+    public TokenValidationResponse validateRefreshToken(TokenValidationRequest request) {
         final String token = extractTokenFromHeader(request.tokenHeader());
         final String login = jwtUtil.extractUsername(token);
         return new TokenValidationResponse(
                 jwtUtil.isRefreshTokenValid(token),
+                login
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public TokenValidationResponse validateAccessToken(TokenValidationRequest request) {
+        final String token = extractTokenFromHeader(request.tokenHeader());
+        final String login = jwtUtil.extractUsername(token);
+        final UserPrincipal userPrincipal = loadUserByUsername(login);
+        return new TokenValidationResponse(
+                jwtUtil.isAccessTokenValid(token, userPrincipal),
                 login
         );
     }

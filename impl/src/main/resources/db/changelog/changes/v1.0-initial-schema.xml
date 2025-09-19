@@ -4,15 +4,6 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
-    <changeSet id="create_user_role_enum" author="Tsimafei Chabiaruk">
-        <sql>
-            CREATE TYPE user_role AS ENUM ('ADMIN', 'USER', 'GUEST');
-        </sql>
-        <rollback>
-            DROP TYPE user_role;
-        </rollback>
-    </changeSet>
-
         <changeSet id="create_users_auth_table" author="Tsimafei Chabiaruk">
             <createTable tableName="users_auth">
                 <column name="id" type="bigserial" autoIncrement="true">
@@ -24,9 +15,13 @@
                 <column name="password_hash" type="text">
                     <constraints nullable="false"/>
                 </column>
-                <column name="roles" type="user_role[]">
+                <column name="user_roles" type="text">
                     <constraints nullable="false"/>
                 </column>
+                <column name="created_at" type="datetime">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="updated_at" type="datetime"/>
             </createTable>
 
             <rollback>
@@ -53,13 +48,14 @@
                     constraintName="fk_refresh_token_user"
                     referencedTableName="users_auth"
                     referencedColumnNames="id"
+                    onDelete="CASCADE"
             />
 
             <rollback>
                 <dropForeignKeyConstraint
                         baseTableName="refresh_tokens"
                         constraintName="fk_refresh_token_user"/>
-                <dropTable tableName="refresh_tokens"
+                <dropTable tableName="refresh_tokens"/>
             </rollback>
         </changeSet>
 </databaseChangeLog>

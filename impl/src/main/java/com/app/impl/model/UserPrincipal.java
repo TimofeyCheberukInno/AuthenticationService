@@ -1,7 +1,7 @@
 package com.app.impl.model;
 
-import java.util.List;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -18,13 +18,11 @@ public class UserPrincipal implements UserDetails {
     public UserPrincipal(
             String login,
             String password,
-            List<UserRole> authorities
+            UserRole authority
     ) {
         this.login = login;
         this.password = password;
-        this.authorities = authorities.stream()
-                .map(authority -> new SimpleGrantedAuthority(authority.getName()))
-                .toList();
+        this.authorities = Collections.singleton(new SimpleGrantedAuthority(authority.getName()));
     }
 
     @Override

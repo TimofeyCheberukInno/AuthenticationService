@@ -9,14 +9,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.CascadeType;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Builder;
-
-// TODO: каскадирование
 
 @Entity
 @Table(name = "refresh_tokens")
@@ -33,7 +32,7 @@ public class RefreshToken {
     @Column(name = "token_hash", unique = true, nullable = false)
     private String tokenHash;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 }
