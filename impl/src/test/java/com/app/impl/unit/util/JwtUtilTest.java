@@ -1,10 +1,8 @@
 package com.app.impl.unit.util;
 
-import com.app.impl.enums.UserRole;
-import com.app.impl.model.UserPrincipal;
-import com.app.impl.repository.RefreshTokenRepository;
-import com.app.impl.util.JwtUtil;
-import com.app.impl.util.TokenHashUtil;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -15,8 +13,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import com.app.impl.enums.UserRole;
+import com.app.impl.model.UserPrincipal;
+import com.app.impl.repository.RefreshTokenRepository;
+import com.app.impl.util.JwtUtil;
+import com.app.impl.util.TokenHashUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class JwtUtilTest {
@@ -29,11 +30,19 @@ public class JwtUtilTest {
     @InjectMocks
     private JwtUtil jwtUtil;
 
+    private UserPrincipal userPrincipal;
+
     @BeforeEach
     void beforeAll() {
         ReflectionTestUtils.setField(jwtUtil, "secretKey", "d2VyaW5zd2VpbnN1cGVyd2FzZ2Vpc2VjcmV0a2V5Zm9yand0YW5kc3ByaW5n");
         ReflectionTestUtils.setField(jwtUtil, "accessTokenExpiration", 1800000);
         ReflectionTestUtils.setField(jwtUtil, "refreshTokenExpiration", 604800000);
+
+        userPrincipal = new UserPrincipal(
+                "user",
+                "12345",
+                UserRole.ROLE_USER
+        );
     }
 
     @Nested
@@ -42,12 +51,6 @@ public class JwtUtilTest {
         @Test
         @DisplayName("Test that token is not blank")
         void shouldTestThatTokenIsNotBlank() {
-            UserPrincipal userPrincipal = new UserPrincipal(
-                    "user",
-                    "12345",
-                    UserRole.ROLE_USER
-            );
-
             assertFalse(jwtUtil.generateAccessToken(userPrincipal).isBlank());
         }
     }
@@ -58,12 +61,6 @@ public class JwtUtilTest {
         @Test
         @DisplayName("Test that token is not blank")
         void shouldTestThatTokenIsNotBlank() {
-            UserPrincipal userPrincipal = new UserPrincipal(
-                    "user",
-                    "12345",
-                    UserRole.ROLE_USER
-            );
-
             assertFalse(jwtUtil.generateRefreshToken(userPrincipal).isBlank());
         }
     }
@@ -74,12 +71,6 @@ public class JwtUtilTest {
         @Test
         @DisplayName("Test that username extracts from token")
         void shouldTestThatUsernameExtractsFromToken() {
-            UserPrincipal userPrincipal = new UserPrincipal(
-                    "user",
-                    "12345",
-                    UserRole.ROLE_USER
-            );
-
             String token = jwtUtil.generateAccessToken(userPrincipal);
             assertEquals(userPrincipal.getUsername(), jwtUtil.extractUsername(token));
         }
@@ -91,12 +82,6 @@ public class JwtUtilTest {
         @Test
         @DisplayName("Check that token is not expired right after creation")
         void shouldTestThatTokenIsNotExpiredAfterCreation() {
-            UserPrincipal userPrincipal = new UserPrincipal(
-                    "user",
-                    "12345",
-                    UserRole.ROLE_USER
-            );
-
             String token = jwtUtil.generateAccessToken(userPrincipal);
             assertFalse(jwtUtil.isTokenExpired(token));
         }

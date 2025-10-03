@@ -32,7 +32,7 @@ public class User extends AuditableEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "user_roles", nullable = false)
-    private UserRole roles;
+    private UserRole role;
 
     @Override
     public boolean equals(Object o) {
@@ -55,7 +55,7 @@ public class User extends AuditableEntity {
         return "User{" +
                 "id=" + id +
                 ", login='" + login + '\'' +
-                ", roles=" + roles +
+                ", roles=" + role +
                 '}';
     }
 }

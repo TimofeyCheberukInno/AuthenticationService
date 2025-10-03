@@ -35,4 +35,13 @@ public class RefreshToken {
     @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+
+        RefreshToken refreshToken = (RefreshToken) o;
+        return tokenHash.equals(refreshToken.tokenHash);
+    }
 }
