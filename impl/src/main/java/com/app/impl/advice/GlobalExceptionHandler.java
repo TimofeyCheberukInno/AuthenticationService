@@ -1,5 +1,6 @@
 package com.app.impl.advice;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataAccessException;
@@ -134,6 +135,18 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(NoSuchAlgorithmException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchAlgorithmException(
+            NoSuchAlgorithmException ex,
+            WebRequest request
+    ) {
+        return buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                ex.getMessage(),
+                request.getDescription(false)
+        );
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
             RuntimeException ex,
@@ -158,6 +171,3 @@ public class GlobalExceptionHandler {
         );
     }
 }
-
-
-// TODO: NoSuchAlgorithmException
