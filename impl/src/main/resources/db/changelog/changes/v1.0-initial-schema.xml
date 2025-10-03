@@ -48,7 +48,6 @@
                     constraintName="fk_refresh_token_user"
                     referencedTableName="users_auth"
                     referencedColumnNames="id"
-                    onDelete="CASCADE"
             />
 
             <rollback>

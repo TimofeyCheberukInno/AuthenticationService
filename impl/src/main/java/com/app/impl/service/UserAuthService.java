@@ -3,6 +3,8 @@ package com.app.impl.service;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
+import jakarta.persistence.EntityManager;
+
 import io.jsonwebtoken.JwtException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ public class UserAuthService implements UserDetailsService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final TokenHashUtil tokenHashUtil;
+    private final EntityManager entityManager;
 
     @Autowired
     public UserAuthService(
@@ -43,13 +46,15 @@ public class UserAuthService implements UserDetailsService {
             RefreshTokenRepository refreshTokenRepository,
             JwtUtil jwtUtil,
             PasswordEncoder passwordEncoder,
-            TokenHashUtil tokenHashUtil
+            TokenHashUtil tokenHashUtil,
+            EntityManager entityManager
     ) {
         this.userAuthRepository = userAuthRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.tokenHashUtil = tokenHashUtil;
+        this.entityManager = entityManager;
     }
 
     @Transactional(readOnly = true)
@@ -93,10 +98,18 @@ public class UserAuthService implements UserDetailsService {
         UserPrincipal userPrincipal = loadUserByUsername(request.login());
         String accessToken = jwtUtil.generateAccessToken(userPrincipal);
         String refreshToken = jwtUtil.generateRefreshToken(userPrincipal);
+
         RefreshToken refreshTokenEntity = RefreshToken.builder()
                 .tokenHash(tokenHashUtil.hashToken(refreshToken))
                 .user(user)
                 .build();
+
+        Optional<RefreshToken> oldRefreshToken = refreshTokenRepository.findByUser(user);
+        oldRefreshToken.ifPresent(refreshTokenRepository::delete);
+        // Метод flush() заставляет JPA синхронизировать состояние Persistence Context
+        // с базой данных, отправляя все накопленные SQL-запросы
+        // (в данном случае DELETE) в базу данных немедленно.
+        entityManager.flush();
         refreshTokenRepository.save(refreshTokenEntity);
 
         return new AuthResponse(accessToken, refreshToken);
@@ -120,12 +133,17 @@ public class UserAuthService implements UserDetailsService {
         String accessToken = jwtUtil.generateAccessToken(userPrincipal);
         String refreshToken = jwtUtil.generateRefreshToken(userPrincipal);
 
-        Optional<RefreshToken> oldRefreshToken = refreshTokenRepository.findByUser(user);
-        oldRefreshToken.ifPresent(refreshTokenRepository::delete);
         RefreshToken refreshTokenEntity = RefreshToken.builder()
                 .tokenHash(tokenHashUtil.hashToken(refreshToken))
                 .user(user)
                 .build();
+
+        Optional<RefreshToken> oldRefreshToken = refreshTokenRepository.findByUser(user);
+        oldRefreshToken.ifPresent(refreshTokenRepository::delete);
+        // Метод flush() заставляет JPA синхронизировать состояние Persistence Context
+        // с базой данных, отправляя все накопленные SQL-запросы
+        // (в данном случае DELETE) в базу данных немедленно.
+        entityManager.flush();
         refreshTokenRepository.save(refreshTokenEntity);
 
         return new AuthResponse(accessToken, refreshToken);

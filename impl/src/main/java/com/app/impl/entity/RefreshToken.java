@@ -32,7 +32,7 @@ public class RefreshToken {
     @Column(name = "token_hash", unique = true, nullable = false)
     private String tokenHash;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
