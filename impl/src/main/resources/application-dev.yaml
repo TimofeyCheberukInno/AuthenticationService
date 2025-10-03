@@ -1,12 +1,14 @@
 jwt:
   secret-key: d2VyaW5zd2VpbnN1cGVyd2FzZ2Vpc2VjcmV0a2V5Zm9yand0YW5kc3ByaW5n
   access-token:
-    expiration: 1800
+    # in millis
+    expiration: 1800000
   refresh-token:
-    expiration: 604800
+    # in millis
+    expiration: 604800000
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/authDB
+    url: jdbc:postgresql://localhost:5434/authDB
     username: postgres
-    password: Tim4ik13
+    password: Timofey1305
