@@ -1,5 +1,7 @@
 package com.app.impl.controller;
 
+import java.security.NoSuchAlgorithmException;
+
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +22,6 @@ import com.app.impl.model.dto.auth.AuthRequest;
 import com.app.impl.exception.AuthenticationException;
 import com.app.impl.service.UserAuthService;
 
-import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequestMapping("/auth")
@@ -35,11 +36,11 @@ public class UserAuthController {
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody @Valid AuthRequest request) throws AuthenticationException {
         userAuthService.register(request);
-        return ResponseEntity.status(HttpStatus.OK)
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .build();
     }
 
-    @RequestMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequest request) throws AuthenticationException, NoSuchAlgorithmException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userAuthService.login(request));
@@ -51,13 +52,13 @@ public class UserAuthController {
                 .body(userAuthService.refreshToken(request));
     }
 
-    @GetMapping("/validateAccessToken")
+    @PostMapping("/validateAccessToken")
     public ResponseEntity<TokenValidationResponse> validateAccessToken(@RequestBody @Valid TokenValidationRequest request) throws AuthenticationException, NoSuchAlgorithmException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userAuthService.validateAccessToken(request));
     }
 
-    @GetMapping("/validateRefreshToken")
+    @PostMapping("/validateRefreshToken")
     public ResponseEntity<TokenValidationResponse> validateRefreshToken(@RequestBody @Valid TokenValidationRequest request) throws AuthenticationException, NoSuchAlgorithmException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userAuthService.validateRefreshToken(request));

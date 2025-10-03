@@ -12,6 +12,7 @@ import java.util.Optional;
 import com.app.impl.model.dto.tokenValidation.TokenValidationRequest;
 import com.app.impl.model.dto.tokenValidation.TokenValidationResponse;
 import io.jsonwebtoken.JwtException;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,7 +44,7 @@ import com.app.impl.util.JwtUtil;
 import com.app.impl.util.TokenHashUtil;
 
 @ExtendWith(MockitoExtension.class)
-public class UserAuthServiceTests {
+public class UserAuthServiceTest {
     @Mock
     UserAuthRepository userAuthRepository;
 
@@ -55,6 +56,9 @@ public class UserAuthServiceTests {
 
     @Mock
     TokenHashUtil tokenHashUtil;
+
+    @Mock
+    EntityManager entityManager;
 
     @InjectMocks
     UserAuthService userAuthService;
