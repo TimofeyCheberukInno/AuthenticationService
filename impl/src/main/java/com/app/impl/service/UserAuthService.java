@@ -29,8 +29,6 @@ import com.app.impl.model.UserPrincipal;
 import com.app.impl.repository.UserAuthRepository;
 import com.app.impl.exception.UserPrincipalNotFoundException;
 
-// FIXME: issues with refresh and login methods
-//  access token expires rapidly
 @Service
 public class UserAuthService implements UserDetailsService {
     private final UserAuthRepository userAuthRepository;
@@ -135,6 +133,7 @@ public class UserAuthService implements UserDetailsService {
 
     @Transactional(readOnly = true)
     public TokenValidationResponse validateRefreshToken(TokenValidationRequest request) {
+        // TODO: проверка на refreshToken
         final String token = extractTokenFromHeader(request.tokenHeader());
         final String login = jwtUtil.extractUsername(token);
         return new TokenValidationResponse(
@@ -145,6 +144,7 @@ public class UserAuthService implements UserDetailsService {
 
     @Transactional(readOnly = true)
     public TokenValidationResponse validateAccessToken(TokenValidationRequest request) {
+        // TODO: проверка на accessToken
         final String token = extractTokenFromHeader(request.tokenHeader());
         final String login = jwtUtil.extractUsername(token);
         final UserPrincipal userPrincipal = loadUserByUsername(login);
