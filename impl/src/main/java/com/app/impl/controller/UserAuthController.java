@@ -52,13 +52,13 @@ public class UserAuthController {
     }
 
     @GetMapping("/validateAccessToken")
-    public ResponseEntity<TokenValidationResponse> validateAccessToken(@RequestBody @Valid TokenValidationRequest request) throws AuthenticationException {
+    public ResponseEntity<TokenValidationResponse> validateAccessToken(@RequestBody @Valid TokenValidationRequest request) throws AuthenticationException, NoSuchAlgorithmException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userAuthService.validateAccessToken(request));
     }
 
     @GetMapping("/validateRefreshToken")
-    public ResponseEntity<TokenValidationResponse> validateRefreshToken(@RequestBody @Valid TokenValidationRequest request) throws AuthenticationException {
+    public ResponseEntity<TokenValidationResponse> validateRefreshToken(@RequestBody @Valid TokenValidationRequest request) throws AuthenticationException, NoSuchAlgorithmException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userAuthService.validateRefreshToken(request));
     }
