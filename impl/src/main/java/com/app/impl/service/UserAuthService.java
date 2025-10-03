@@ -132,9 +132,11 @@ public class UserAuthService implements UserDetailsService {
     }
 
     @Transactional(readOnly = true)
-    public TokenValidationResponse validateRefreshToken(TokenValidationRequest request) {
-        // TODO: проверка на refreshToken
+    public TokenValidationResponse validateRefreshToken(TokenValidationRequest request) throws NoSuchAlgorithmException {
         final String token = extractTokenFromHeader(request.tokenHeader());
+        if(!jwtUtil.isRefreshToken(token))
+            throw new JwtException("Given token is not refresh token! Could not process refresh!");
+
         final String login = jwtUtil.extractUsername(token);
         return new TokenValidationResponse(
                 jwtUtil.isRefreshTokenValid(token),
@@ -143,9 +145,11 @@ public class UserAuthService implements UserDetailsService {
     }
 
     @Transactional(readOnly = true)
-    public TokenValidationResponse validateAccessToken(TokenValidationRequest request) {
-        // TODO: проверка на accessToken
+    public TokenValidationResponse validateAccessToken(TokenValidationRequest request) throws NoSuchAlgorithmException {
         final String token = extractTokenFromHeader(request.tokenHeader());
+        if(jwtUtil.isRefreshToken(token))
+            throw new JwtException("Given token is refresh token! Should be given with access token!");
+
         final String login = jwtUtil.extractUsername(token);
         final UserPrincipal userPrincipal = loadUserByUsername(login);
         return new TokenValidationResponse(
