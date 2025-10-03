@@ -59,7 +59,7 @@ public class UserAuthService implements UserDetailsService {
                 .map(user -> new UserPrincipal(
                         user.getLogin(),
                         user.getPasswordHash(),
-                        user.getRoles()
+                        user.getRole()
                 ))
                 .orElseThrow(() -> new UserPrincipalNotFoundException(String.format("User with login %s was not found", login)));
     }
@@ -75,7 +75,7 @@ public class UserAuthService implements UserDetailsService {
         User user = User.builder()
                 .login(login)
                 .passwordHash(passwordEncoder.encode(request.password()))
-                .roles(UserRole.ROLE_USER)
+                .role(UserRole.ROLE_USER)
                 .build();
 
         userAuthRepository.save(user);
