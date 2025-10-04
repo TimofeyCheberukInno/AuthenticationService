@@ -1,7 +1,7 @@
 FROM maven:3.9.11-eclipse-temurin-24-alpine AS build
 WORKDIR /app
-COPY ./src ./src
 COPY ./pom.xml ./pom.xml
+COPY ./src ./src
 RUN mvn clean package -DskipTests
 
 FROM openjdk:24-jdk
