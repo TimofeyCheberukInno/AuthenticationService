@@ -7,6 +7,8 @@ spring:
 jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-token:
+    # in millis
     expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
   refresh-token:
+    # in millis
     expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
