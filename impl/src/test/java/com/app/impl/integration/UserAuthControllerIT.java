@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.app.impl.service.UserAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,7 +34,6 @@ import com.app.impl.entity.User;
 import com.app.impl.enums.UserRole;
 import com.app.impl.model.dto.auth.AuthResponse;
 import com.app.impl.model.dto.tokenRefresh.TokenRefreshRequest;
-import com.app.impl.service.UserAuthService;
 import com.app.impl.util.JwtUtil;
 import com.app.impl.util.TokenHashUtil;
 import com.app.impl.model.dto.auth.AuthRequest;

@@ -18,19 +18,19 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.app.impl.exception.AuthenticationException;
 import com.app.impl.exception.TokenExpiredException;
 import com.app.impl.model.UserPrincipal;
-import com.app.impl.service.UserAuthService;
+import com.app.impl.service.UserAuthServiceImpl;
 import com.app.impl.util.JwtUtil;
 
 @Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final UserAuthService userAuthService;
+    private final UserAuthServiceImpl userAuthService;
     private final JwtUtil jwtUtil;
 
     @Autowired
     public JwtAuthenticationFilter(
-            UserAuthService userAuthService,
+            UserAuthServiceImpl userAuthService,
             JwtUtil jwtUtil
     ) {
         this.userAuthService = userAuthService;

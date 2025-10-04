@@ -39,7 +39,7 @@ import com.app.impl.exception.UserPrincipalNotFoundException;
 import com.app.impl.model.UserPrincipal;
 import com.app.impl.repository.RefreshTokenRepository;
 import com.app.impl.repository.UserAuthRepository;
-import com.app.impl.service.UserAuthService;
+import com.app.impl.service.UserAuthServiceImpl;
 import com.app.impl.util.JwtUtil;
 import com.app.impl.util.TokenHashUtil;
 
@@ -61,7 +61,7 @@ public class UserAuthServiceTest {
     EntityManager entityManager;
 
     @InjectMocks
-    UserAuthService userAuthService;
+    UserAuthServiceImpl userAuthService;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
