@@ -38,7 +38,7 @@ on:
         run: |
           mvn clean install \
           sonar:sonar \
-    	     -Dsonar.projectKey=TimofeyCheberukInno_UserService \
+          -Dsonar.projectKey=TimofeyCheberukInno_AuthenticationService \
           -Dsonar.organization=${{ properties.sonar.organization }} \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
