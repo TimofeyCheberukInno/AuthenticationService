@@ -2,12 +2,13 @@ package com.app.impl.controller;
 
 import java.security.NoSuchAlgorithmException;
 
+import com.app.impl.model.dto.register.RegisterResponse;
+import com.app.impl.service.UserAuthService;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +21,6 @@ import com.app.impl.model.dto.tokenValidation.TokenValidationRequest;
 import com.app.impl.model.dto.tokenValidation.TokenValidationResponse;
 import com.app.impl.model.dto.auth.AuthRequest;
 import com.app.impl.exception.AuthenticationException;
-import com.app.impl.service.UserAuthService;
 
 
 @RestController
@@ -34,10 +34,9 @@ public class UserAuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody @Valid AuthRequest request) throws AuthenticationException {
-        userAuthService.register(request);
+    public ResponseEntity<RegisterResponse> register(@RequestBody @Valid AuthRequest request) throws AuthenticationException {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .build();
+                .body(userAuthService.register(request));
     }
 
     @PostMapping("/login")
