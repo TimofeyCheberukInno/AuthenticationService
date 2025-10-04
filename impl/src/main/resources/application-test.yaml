@@ -1,8 +1,8 @@
 jwt:
-  secret-key: ${JWT_SECRET_KEY}
+  secret-key: d2VyaW5zd2VpbnN1cGVyd2FzZ2Vpc2VjcmV0a2V5Zm9yand0YW5kc3ByaW5n
   access-token:
     # in millis
-    expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
+    expiration: 1800000
   refresh-token:
     # in millis
-    expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
+    expiration: 604800000
