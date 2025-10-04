@@ -9,10 +9,10 @@ import static org.mockito.Mockito.when;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
-import com.app.impl.model.dto.tokenValidation.TokenValidationRequest;
-import com.app.impl.model.dto.tokenValidation.TokenValidationResponse;
-import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityManager;
+
+import io.jsonwebtoken.JwtException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,6 +27,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.app.impl.model.dto.register.RegisterResponse;
+import com.app.impl.model.dto.tokenValidation.TokenValidationRequest;
+import com.app.impl.model.dto.tokenValidation.TokenValidationResponse;
 import com.app.impl.entity.RefreshToken;
 import com.app.impl.exception.TokenExpiredException;
 import com.app.impl.model.dto.auth.AuthResponse;
@@ -121,16 +124,33 @@ public class UserAuthServiceTest {
                 login,
                 password
         );
+        final User userPreSave = User.builder()
+                .login(login)
+                .passwordHash(passwordEncoder.encode(password))
+                .role(UserRole.ROLE_USER)
+                .build();
+        final User userPostSave = User.builder()
+                .id(1L)
+                .login(login)
+                .passwordHash(passwordEncoder.encode(password))
+                .role(UserRole.ROLE_USER)
+                .build();
 
         @Test
         @DisplayName("Successful register of user")
         void shouldRegisterUser() {
             when(userAuthRepository.findByLogin(login)).thenReturn(Optional.empty());
+            when(userAuthRepository.save(userPreSave)).thenReturn(userPostSave);
 
-            userAuthService.register(authRequest);
+            RegisterResponse response = userAuthService.register(authRequest);
+
+            assertEquals(login, response.login());
+            assertEquals(1L, response.id());
 
             verify(userAuthRepository, Mockito.times(1))
                     .findByLogin(login);
+            verify(userAuthRepository, Mockito.times(1))
+                    .save(userPreSave);
         }
 
         @Test
