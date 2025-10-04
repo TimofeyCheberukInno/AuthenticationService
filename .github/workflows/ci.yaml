@@ -54,7 +54,7 @@ on:
       - name: Checkout repository code
         uses: actions/checkout@v4
         
-      - name: Build Docker image: 
+      - name: Build Docker image 
         run: docker build -t auth-service:latest -f ./impl/DockerFile ./impl
         
       - name: Save Docker image to tar
