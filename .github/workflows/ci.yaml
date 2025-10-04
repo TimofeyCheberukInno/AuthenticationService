@@ -1,0 +1,67 @@
+name: Authentication Service CI Pipeline
+
+on:
+  push: 
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+    
+  jobs:
+    build:
+      name: Build and analyze
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+        with:
+        fetch-depth: 0
+        
+      - name : JDK setup
+        uses : actions/setup-java@v4
+        with:
+        java-version: '24'
+        distribution: 'temurin'
+        cache: maven
+        cache-dependency-path: ./impl/pom.xml
+        
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+        
+      - name: Run Maven with JaCoCo and SonarCloud
+        env: 
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn clean install \
+          sonar:sonar \
+    	     -Dsonar.projectKey=TimofeyCheberukInno_UserService \
+          -Dsonar.organization=${{ properties.sonar.organization }} \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+        working-directory: ./impl  
+            
+    docker:
+      name: Build Docker Image
+      runs-on: ubuntu-latest
+      needs: build-and-analyze
+      if: needs.build-and-analyze.result == 'success'
+      
+      steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+        
+      - name: Build Docker image: 
+        run: docker build -t auth-service:latest -f ./impl/DockerFile ./impl
+        
+      - name: Save Docker image to tar
+        run: docker save auth-service:latest | gzip > auth-service.tar.gz
+        
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: auth-service-docker-image
+          path: auth-service.tar.gz
