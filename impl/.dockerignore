@@ -1,0 +1,11 @@
+*
+
+!src/
+!pom.xml
+!mvnw
+!mvn/
+
+src/test
+
+.gitattributes
+.gitignore
