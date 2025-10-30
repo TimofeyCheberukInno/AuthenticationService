@@ -1,4 +1,4 @@
-package com.app.impl.config;
+package com.app.impl.security.filter;
 
 import java.io.IOException;
 
@@ -15,11 +15,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.app.impl.exception.AuthenticationException;
-import com.app.impl.exception.TokenExpiredException;
 import com.app.impl.model.UserPrincipal;
 import com.app.impl.service.UserAuthServiceImpl;
-import com.app.impl.util.JwtUtil;
+import com.app.impl.security.util.JwtUtil;
 
 @Slf4j
 @Component
@@ -50,34 +48,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        try {
-            final String jwt = header.substring(7);
-            final String username = jwtUtil.extractUsername(jwt);
-            if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserPrincipal userPrincipal = userAuthService.loadUserByUsername(username);
+        final String jwt = header.substring(7);
+        final String username = jwtUtil.extractUsername(jwt);
+        if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserPrincipal userPrincipal = userAuthService.loadUserByUsername(username);
 
-                if(jwtUtil.isAccessTokenValid(jwt, userPrincipal)) {
-                    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                            userPrincipal,
-                            null,
-                            userPrincipal.getAuthorities()
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(token);
-                }
+            if(jwtUtil.isAccessTokenValid(jwt, userPrincipal)) {
+                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
+                        userPrincipal,
+                        null,
+                        userPrincipal.getAuthorities()
+                );
+                SecurityContextHolder.getContext().setAuthentication(token);
             }
-
-            filterChain.doFilter(request, response);
-
-        } catch (AuthenticationException | TokenExpiredException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json;charset=utf-8");
-            response.getWriter().write("""
-                {
-                    "error": "Authentication failed",
-                    "message": "%s"
-                }
-                """.formatted(e.getMessage()));
-            log.error(e.getMessage());
         }
+
+        filterChain.doFilter(request, response);
     }
 }

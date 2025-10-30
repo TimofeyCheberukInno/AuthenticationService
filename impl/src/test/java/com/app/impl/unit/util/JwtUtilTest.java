@@ -16,8 +16,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.app.impl.enums.UserRole;
 import com.app.impl.model.UserPrincipal;
 import com.app.impl.repository.RefreshTokenRepository;
-import com.app.impl.util.JwtUtil;
-import com.app.impl.util.TokenHashUtil;
+import com.app.impl.security.util.JwtUtil;
+import com.app.impl.security.util.TokenHashUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class JwtUtilTest {

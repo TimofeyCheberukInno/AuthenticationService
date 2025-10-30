@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.app.impl.model.dto.tokenRefresh.TokenRefreshRequest;
-import com.app.impl.util.TokenHashUtil;
+import com.app.impl.security.util.TokenHashUtil;
 import com.app.impl.model.dto.tokenValidation.TokenValidationRequest;
 import com.app.impl.model.dto.register.RegisterResponse;
 import com.app.impl.model.dto.tokenValidation.TokenValidationResponse;
@@ -27,7 +27,7 @@ import com.app.impl.model.dto.auth.AuthResponse;
 import com.app.impl.model.dto.auth.AuthRequest;
 import com.app.impl.entity.User;
 import com.app.impl.exception.UserAlreadyExistsException;
-import com.app.impl.util.JwtUtil;
+import com.app.impl.security.util.JwtUtil;
 import com.app.impl.model.UserPrincipal;
 import com.app.impl.repository.UserAuthRepository;
 import com.app.impl.exception.UserPrincipalNotFoundException;

@@ -1,9 +1,8 @@
-package com.app.impl.util;
+package com.app.impl.security.util;
 
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -40,21 +39,19 @@ public class JwtUtil {
     @Value("${jwt.refresh-token.expiration}")
     private long refreshTokenExpiration;
 
-    private final String secretKey;
+    @Value("${jwt.secret-key}")
+    private String secretKey;
 
     @Autowired
     public JwtUtil(RefreshTokenRepository refreshTokenRepository,
-                   TokenHashUtil tokenHashUtil,
-                   @Value("${jwt.secret-key}") String secretKey
+                   TokenHashUtil tokenHashUtil
     ) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.tokenHashUtil = tokenHashUtil;
-        this.secretKey = secretKey;
     }
 
     public String generateAccessToken(UserPrincipal userPrincipal) {
         return Jwts.builder()
-                .setClaims(new HashMap<>())
                 .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
@@ -64,7 +61,6 @@ public class JwtUtil {
 
     public String generateRefreshToken(UserPrincipal userPrincipal) {
         return Jwts.builder()
-                .setClaims(new HashMap<>())
                 .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
