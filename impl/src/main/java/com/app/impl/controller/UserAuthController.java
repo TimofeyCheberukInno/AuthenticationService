@@ -24,7 +24,7 @@ import com.app.impl.exception.AuthenticationException;
 
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class UserAuthController {
     private final UserAuthService userAuthService;
 
