@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.app.impl.model.UserPrincipal;
-import com.app.impl.service.UserAuthServiceImpl;
+import com.app.impl.service.impl.UserAuthServiceImpl;
 import com.app.impl.security.util.JwtUtil;
 
 @Slf4j

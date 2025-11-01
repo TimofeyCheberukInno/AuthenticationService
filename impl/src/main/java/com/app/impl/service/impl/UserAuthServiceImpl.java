@@ -1,8 +1,11 @@
-package com.app.impl.service;
+package com.app.impl.service.impl;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
+import com.app.impl.exception.UserNotFoundException;
+import com.app.impl.model.dto.delete.DeleteRequest;
+import com.app.impl.service.UserAuthService;
 import jakarta.persistence.EntityManager;
 
 import io.jsonwebtoken.JwtException;
@@ -75,9 +78,10 @@ public class UserAuthServiceImpl implements UserDetailsService, UserAuthService 
     public RegisterResponse register(AuthRequest request) {
         final String login = request.login();
 
-        if(userAuthRepository.findByLogin(login).isPresent()) {
-            throw new UserAlreadyExistsException(login);
-        }
+        userAuthRepository.findByLogin(login)
+                .ifPresent(_ -> {
+                    throw new UserAlreadyExistsException(login);
+                });
 
         User user = User.builder()
                 .login(login)
@@ -185,6 +189,15 @@ public class UserAuthServiceImpl implements UserDetailsService, UserAuthService 
                 jwtUtil.isAccessTokenValid(token, userPrincipal),
                 login
         );
+    }
+
+    @Transactional
+    @Override
+    public void delete(DeleteRequest request) {
+        final String login = request.login();
+
+        User user = userAuthRepository.findByLogin(login).orElseThrow(() -> new UserNotFoundException(login));
+        userAuthRepository.delete(user);
     }
 
     @Override

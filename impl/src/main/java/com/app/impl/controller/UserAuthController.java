@@ -2,6 +2,7 @@ package com.app.impl.controller;
 
 import java.security.NoSuchAlgorithmException;
 
+import com.app.impl.model.dto.delete.DeleteRequest;
 import com.app.impl.model.dto.register.RegisterResponse;
 import com.app.impl.service.UserAuthService;
 import jakarta.validation.Valid;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +24,6 @@ import com.app.impl.model.dto.tokenValidation.TokenValidationResponse;
 import com.app.impl.model.dto.auth.AuthRequest;
 import com.app.impl.exception.AuthenticationException;
 
-
 @RestController
 @RequestMapping("/api/auth")
 public class UserAuthController {
@@ -34,32 +35,39 @@ public class UserAuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody @Valid AuthRequest request) throws AuthenticationException {
+    public ResponseEntity<RegisterResponse> register(@RequestBody @Valid AuthRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(userAuthService.register(request));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequest request) throws AuthenticationException, NoSuchAlgorithmException {
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequest request) throws NoSuchAlgorithmException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userAuthService.login(request));
     }
 
     @PutMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(@RequestBody @Valid TokenRefreshRequest request) throws AuthenticationException, NoSuchAlgorithmException {
+    public ResponseEntity<AuthResponse> refresh(@RequestBody @Valid TokenRefreshRequest request) throws NoSuchAlgorithmException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userAuthService.refreshToken(request));
     }
 
     @PostMapping("/validateAccessToken")
-    public ResponseEntity<TokenValidationResponse> validateAccessToken(@RequestBody @Valid TokenValidationRequest request) throws AuthenticationException, NoSuchAlgorithmException {
+    public ResponseEntity<TokenValidationResponse> validateAccessToken(@RequestBody @Valid TokenValidationRequest request) throws NoSuchAlgorithmException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userAuthService.validateAccessToken(request));
     }
 
     @PostMapping("/validateRefreshToken")
-    public ResponseEntity<TokenValidationResponse> validateRefreshToken(@RequestBody @Valid TokenValidationRequest request) throws AuthenticationException, NoSuchAlgorithmException {
+    public ResponseEntity<TokenValidationResponse> validateRefreshToken(@RequestBody @Valid TokenValidationRequest request) throws NoSuchAlgorithmException {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userAuthService.validateRefreshToken(request));
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> delete(@RequestBody @Valid DeleteRequest request) throws AuthenticationException {
+        userAuthService.delete(request);
+        return ResponseEntity.status(HttpStatus.OK)
+                .build();
     }
 }

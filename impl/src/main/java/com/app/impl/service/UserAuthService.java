@@ -4,6 +4,7 @@ import java.security.NoSuchAlgorithmException;
 
 import com.app.impl.model.dto.auth.AuthRequest;
 import com.app.impl.model.dto.auth.AuthResponse;
+import com.app.impl.model.dto.delete.DeleteRequest;
 import com.app.impl.model.dto.tokenValidation.TokenValidationResponse;
 import com.app.impl.model.dto.register.RegisterResponse;
 import com.app.impl.model.dto.tokenRefresh.TokenRefreshRequest;
@@ -19,6 +20,12 @@ public interface UserAuthService {
     TokenValidationResponse validateRefreshToken(TokenValidationRequest request) throws NoSuchAlgorithmException;
 
     TokenValidationResponse validateAccessToken(TokenValidationRequest request) throws NoSuchAlgorithmException;
+
+    /**
+     * Deactivates account, do the opposite of register method
+     * @param request
+     */
+    void delete(DeleteRequest request);
 
     String extractTokenFromHeader(String header);
 }

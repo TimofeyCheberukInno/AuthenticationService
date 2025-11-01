@@ -99,7 +99,7 @@ public class UserAuthControllerIT {
                     password
             );
 
-            mockMvc.perform(post("/auth/register")
+            mockMvc.perform(post("/api/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(authRequest)))
                     .andExpect(status().isCreated());
@@ -113,7 +113,7 @@ public class UserAuthControllerIT {
                     null
             );
 
-            mockMvc.perform(post("/auth/register")
+            mockMvc.perform(post("/api/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(authRequest)))
                     .andExpect(status().isBadRequest());
@@ -141,7 +141,7 @@ public class UserAuthControllerIT {
                     .build();
             userAuthRepository.save(user);
 
-            mockMvc.perform(post("/auth/login")
+            mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(authRequest)))
                     .andExpect(status().isOk());
@@ -155,7 +155,7 @@ public class UserAuthControllerIT {
                     null
             );
 
-            mockMvc.perform(post("/auth/login")
+            mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(authRequest)))
                     .andExpect(status().isBadRequest());
@@ -181,7 +181,7 @@ public class UserAuthControllerIT {
             final String tokenHeader = "Bearer " + authResponse.refreshToken();
             TokenRefreshRequest request = new TokenRefreshRequest(tokenHeader);
 
-            mockMvc.perform(put("/auth/refresh")
+            mockMvc.perform(put("/api/auth/refresh")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk());
@@ -194,7 +194,7 @@ public class UserAuthControllerIT {
                     "invalid"
             );
 
-            mockMvc.perform(put("/auth/refresh")
+            mockMvc.perform(put("/api/auth/refresh")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest());
@@ -218,7 +218,7 @@ public class UserAuthControllerIT {
             AuthResponse authResponse = userAuthService.login(authRequest);
             TokenValidationRequest tokenValidationRequest = new TokenValidationRequest("Bearer " + authResponse.accessToken());
 
-            MvcResult result = mockMvc.perform(post("/auth/validateAccessToken")
+            MvcResult result = mockMvc.perform(post("/api/auth/validateAccessToken")
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(objectMapper.writeValueAsString(tokenValidationRequest)))
                     .andExpect(status().isOk())
@@ -250,7 +250,7 @@ public class UserAuthControllerIT {
             ReflectionTestUtils.setField(userAuthService, "jwtUtil", jwtUtilSpy);
             when(jwtUtilSpy.isAccessTokenValid(authResponse.accessToken(), userPrincipal)).thenReturn(false);
 
-            MvcResult result = mockMvc.perform(post("/auth/validateAccessToken")
+            MvcResult result = mockMvc.perform(post("/api/auth/validateAccessToken")
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(objectMapper.writeValueAsString(tokenValidationRequest)))
                     .andExpect(status().isOk())
@@ -269,7 +269,7 @@ public class UserAuthControllerIT {
         void shouldReturnBadRequestStatus() throws Exception {
             TokenValidationRequest tokenValidationRequest = new TokenValidationRequest(null);
 
-            mockMvc.perform(post("/auth/validateAccessToken")
+            mockMvc.perform(post("/api/auth/validateAccessToken")
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(objectMapper.writeValueAsString(tokenValidationRequest)))
                     .andExpect(status().isBadRequest());
@@ -293,7 +293,7 @@ public class UserAuthControllerIT {
             AuthResponse authResponse = userAuthService.login(authRequest);
             TokenValidationRequest tokenValidationRequest = new TokenValidationRequest("Bearer " + authResponse.refreshToken());
 
-            MvcResult result = mockMvc.perform(post("/auth/validateRefreshToken")
+            MvcResult result = mockMvc.perform(post("/api/auth/validateRefreshToken")
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(objectMapper.writeValueAsString(tokenValidationRequest)))
                     .andExpect(status().isOk())
@@ -323,7 +323,7 @@ public class UserAuthControllerIT {
             ReflectionTestUtils.setField(userAuthService, "jwtUtil", jwtUtilSpy);
             when(jwtUtilSpy.isRefreshTokenValid(authResponse.refreshToken())).thenReturn(false);
 
-            MvcResult result = mockMvc.perform(post("/auth/validateRefreshToken")
+            MvcResult result = mockMvc.perform(post("/api/auth/validateRefreshToken")
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(objectMapper.writeValueAsString(tokenValidationRequest)))
                     .andExpect(status().isOk())
@@ -342,7 +342,7 @@ public class UserAuthControllerIT {
         void shouldReturnBadRequestStatus() throws Exception {
             TokenValidationRequest tokenValidationRequest = new TokenValidationRequest(null);
 
-            mockMvc.perform(post("/auth/validateRefreshToken")
+            mockMvc.perform(post("/api/auth/validateRefreshToken")
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(objectMapper.writeValueAsString(tokenValidationRequest)))
                     .andExpect(status().isBadRequest());
