@@ -6,7 +6,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.app.impl.model.dto.delete.DeleteRequest;
 import com.app.impl.service.UserAuthService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -346,6 +348,38 @@ public class UserAuthControllerIT {
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(objectMapper.writeValueAsString(tokenValidationRequest)))
                     .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
+    @DisplayName("Tests for /delete")
+    class DeleteTests {
+        final String login = "email@gmail.com";
+        final User user = User.builder()
+                .login(login)
+                .passwordHash(passwordEncoder.encode("password"))
+                .role(UserRole.ROLE_USER)
+                .build();
+        final DeleteRequest deleteRequest = new DeleteRequest(login);
+
+        @Test
+        @DisplayName("Successful deletion of user auth")
+        void shouldDeleteUserAuth() throws Exception {
+            userAuthRepository.save(user);
+
+            mockMvc.perform(delete("/api/auth/delete")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(deleteRequest)))
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("Failed deletion of user auth")
+        void shouldFailToDeleteUserAuth() throws Exception {
+            mockMvc.perform(delete("/api/auth/delete")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(deleteRequest)))
+                    .andExpect(status().isNotFound());
         }
     }
 }

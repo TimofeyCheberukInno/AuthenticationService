@@ -3,6 +3,7 @@ package com.app.impl.advice;
 import java.security.NoSuchAlgorithmException;
 import java.util.stream.Collectors;
 
+import com.app.impl.exception.UserNotFoundException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +63,18 @@ public class GlobalExceptionHandler {
     ) {
         return buildErrorResponse(
                 HttpStatus.UNAUTHORIZED,
+                ex.getMessage(),
+                request.getDescription(false)
+        );
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(
+            UserNotFoundException ex,
+            WebRequest request
+    ) {
+        return buildErrorResponse(
+                HttpStatus.NOT_FOUND,
                 ex.getMessage(),
                 request.getDescription(false)
         );

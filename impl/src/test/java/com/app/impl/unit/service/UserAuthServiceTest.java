@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
+import com.app.impl.exception.UserNotFoundException;
+import com.app.impl.model.dto.delete.DeleteRequest;
 import jakarta.persistence.EntityManager;
 
 import io.jsonwebtoken.JwtException;
@@ -616,6 +618,47 @@ public class UserAuthServiceTest {
             assertThatExceptionOfType(JwtException.class)
                     .isThrownBy(() -> userAuthService.extractTokenFromHeader(header))
                     .withMessage("Invalid token header");
+        }
+    }
+
+    @Nested
+    @DisplayName("Tests for delete(DeleteRequest request)")
+    class DeleteTests {
+        final String login = "email@gmail.com";
+        final User user = User.builder()
+                .login(login)
+                .passwordHash(passwordEncoder.encode("password"))
+                .role(UserRole.ROLE_USER)
+                .build();
+        final DeleteRequest deleteRequest = new DeleteRequest(login);
+
+        @Test
+        @DisplayName("Successful delete request")
+        void shouldDeleteRequest() {
+            when(userAuthRepository.findByLogin(login))
+                    .thenReturn(Optional.of(user));
+
+            userAuthService.delete(deleteRequest);
+
+            Mockito.verify(userAuthRepository, Mockito.times(1))
+                    .findByLogin(login);
+            Mockito.verify(userAuthRepository, Mockito.times(1))
+                    .delete(user);
+        }
+
+        @Test
+        @DisplayName("User to delete was not found")
+        void shouldThrowUserNotFoundException() {
+            when(userAuthRepository.findByLogin(login))
+                    .thenReturn(Optional.empty());
+
+            assertThatExceptionOfType(UserNotFoundException.class)
+                    .isThrownBy(() -> userAuthService.delete(deleteRequest));
+
+            Mockito.verify(userAuthRepository, Mockito.times(1))
+                    .findByLogin(login);
+            Mockito.verify(userAuthRepository, Mockito.never())
+                    .delete(Mockito.any());
         }
     }
 }
