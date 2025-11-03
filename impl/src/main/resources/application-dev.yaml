@@ -12,3 +12,21 @@ jwt:
   refresh-token:
     # in millis
     expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
+
+management:
+  server:
+    port: 9001
+  endpoints:
+    web:
+      exposure:
+        include: health
+      base-path: /internal/auth-service/actuator
+  endpoint:
+    health:
+      group:
+        readiness:
+          include:
+            - db
+        liveness:
+          include:
+            - ping
