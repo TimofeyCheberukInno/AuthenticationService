@@ -1,8 +1,6 @@
 spring:
   application:
     name: auth_service
-  profiles:
-    active: dev
 
   datasource:
     driver-class-name: org.postgresql.Driver
